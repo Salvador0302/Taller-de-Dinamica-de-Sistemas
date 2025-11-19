@@ -1,0 +1,26 @@
+# Ignore Python bytecode and caches
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*$py.class
+
+# Ignore virtual environments (root or nested)
+venv/
+.venv/
+env/
+ENV/
+pythonenv*/
+vensim_python_web/venv/
+
+# Optional: ignore test caches
+.pytest_cache/
+.tox/
+.nox/
+
+# Optional: ignore coverage data
+.coverage*
+htmlcov/
+
+# Optional: common editor folders
+.vscode/
