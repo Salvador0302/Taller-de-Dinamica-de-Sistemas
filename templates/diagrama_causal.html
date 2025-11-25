@@ -29,6 +29,10 @@
                     <i class="bi bi-bar-chart-line"></i>
                     <span>Tablas y simulación</span>
                 </a>
+                <a href="https://clinquant-dusk-5f3fd5.netlify.app/" class="nav-tab" target="_blank" rel="noopener noreferrer">
+                    <i class="bi bi-water"></i>
+                    <span>Símil Hidrodinámico</span>
+                </a>
             </nav>
         </div>
     </header>
@@ -39,23 +43,51 @@
                 <div class="col-12 col-lg-10">
                     <article class="content-card">
                         <header class="content-header">
-                            <h2 class="content-title">
-                                <i class="bi bi-diagram-3"></i>
-                                Diagrama Causal
-                            </h2>
-                            <p class="content-description">
-                                Representación visual de las relaciones causales entre las variables del sistema
-                            </p>
-                        </header>
-                        <div class="diagram-container">
-                            <div class="placeholder-content">
-                                <i class="bi bi-diagram-3-fill placeholder-icon"></i>
-                                <h3>Diagrama Causal</h3>
-                                <p>Aquí se visualizará el diagrama de lazos causales del modelo de sistemas.</p>
-                                <div class="placeholder-info">
-                                    <span class="badge bg-primary">Próximamente</span>
-                                </div>
+                            <div>
+                                <h2 class="content-title">
+                                    <i class="bi bi-diagram-3"></i>
+                                    Diagrama Causal
+                                </h2>
+                                <p class="content-description">
+                                    Representación visual de las relaciones causales entre las variables del sistema
+                                </p>
                             </div>
+                            {% if diagram %}
+                            <div class="graph-controls">
+                                <button class="graph-btn" title="Zoom In" onclick="zoomDiagram('in')">
+                                    <i class="bi bi-zoom-in"></i>
+                                </button>
+                                <button class="graph-btn" title="Zoom Out" onclick="zoomDiagram('out')">
+                                    <i class="bi bi-zoom-out"></i>
+                                </button>
+                                <button class="graph-btn" title="Resetear Vista" onclick="resetDiagram()">
+                                    <i class="bi bi-arrow-counterclockwise"></i>
+                                </button>
+                                <button class="graph-btn" title="Descargar PNG" onclick="downloadDiagram('Diagrama_Causal')">
+                                    <i class="bi bi-download"></i>
+                                </button>
+                            </div>
+                            {% endif %}
+                        </header>
+                        <div class="diagram-container" id="diagram-container">
+                            {% if diagram %}
+                                <img id="diagram-image" src="{{ diagram }}" alt="Diagrama de Lazos Causales" style="max-width: 100%; height: auto; border-radius: 0.5rem; cursor: grab; transition: transform 0.3s ease;">
+                            {% elif error %}
+                                <div class="placeholder-content">
+                                    <i class="bi bi-exclamation-triangle-fill placeholder-icon" style="color: #ef4444;"></i>
+                                    <h3>Error al generar diagrama</h3>
+                                    <p>{{ error }}</p>
+                                </div>
+                            {% else %}
+                                <div class="placeholder-content">
+                                    <i class="bi bi-diagram-3-fill placeholder-icon"></i>
+                                    <h3>Diagrama Causal</h3>
+                                    <p>Aquí se visualizará el diagrama de lazos causales del modelo de sistemas.</p>
+                                    <div class="placeholder-info">
+                                        <span class="badge bg-primary">Próximamente</span>
+                                    </div>
+                                </div>
+                            {% endif %}
                         </div>
                     </article>
                 </div>
@@ -64,5 +96,87 @@
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+    <script>
+        let diagramScale = 1;
+        let diagramTranslateX = 0;
+        let diagramTranslateY = 0;
+        let isDragging = false;
+        let startX, startY;
+
+        function zoomDiagram(direction) {
+            const img = document.getElementById('diagram-image');
+            if (!img) return;
+            
+            const zoomFactor = direction === 'in' ? 1.2 : 0.833;
+            diagramScale *= zoomFactor;
+            
+            img.style.transform = `scale(${diagramScale}) translate(${diagramTranslateX}px, ${diagramTranslateY}px)`;
+        }
+
+        function resetDiagram() {
+            const img = document.getElementById('diagram-image');
+            if (!img) return;
+            
+            diagramScale = 1;
+            diagramTranslateX = 0;
+            diagramTranslateY = 0;
+            
+            img.style.transform = 'scale(1) translate(0px, 0px)';
+        }
+
+        function downloadDiagram(filename) {
+            const img = document.getElementById('diagram-image');
+            if (!img) return;
+            
+            const a = document.createElement('a');
+            a.href = img.src;
+            a.download = filename + '.png';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        // Habilitar arrastre
+        window.addEventListener('load', function() {
+            const img = document.getElementById('diagram-image');
+            if (!img) return;
+            
+            img.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                startX = e.clientX;
+                startY = e.clientY;
+                img.style.cursor = 'grabbing';
+            });
+            
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                
+                const deltaX = e.clientX - startX;
+                const deltaY = e.clientY - startY;
+                
+                diagramTranslateX += deltaX;
+                diagramTranslateY += deltaY;
+                
+                img.style.transform = `scale(${diagramScale}) translate(${diagramTranslateX}px, ${diagramTranslateY}px)`;
+                
+                startX = e.clientX;
+                startY = e.clientY;
+            });
+            
+            document.addEventListener('mouseup', () => {
+                if (isDragging) {
+                    isDragging = false;
+                    img.style.cursor = 'grab';
+                }
+            });
+            
+            // Zoom con rueda del ratón
+            img.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                const direction = e.deltaY < 0 ? 'in' : 'out';
+                zoomDiagram(direction);
+            });
+        });
+    </script>
 </body>
 </html>
