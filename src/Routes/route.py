@@ -19,4 +19,16 @@ def modelRoute(app):
         else:
             respuesta = make_response(render_template('error.html', error_message=response))
             return respuesta
+    
+    @app.route('/diagrama-causal', methods=['GET'])
+    def diagrama_causal():
+        respuesta = make_response(render_template('diagrama_causal.html'))
+        respuesta.headers['Cache-Control'] = 'public, max-age=180'
+        return respuesta
+    
+    @app.route('/diagrama-forrester', methods=['GET'])
+    def diagrama_forrester():
+        respuesta = make_response(render_template('diagrama_forrester.html'))
+        respuesta.headers['Cache-Control'] = 'public, max-age=180'
+        return respuesta
         

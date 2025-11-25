@@ -1,73 +1,370 @@
 body {
-    margin: 0px;
-    padding: 0px;
-    color: initial !important;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #f9fafb; /* texto global casi blanco */
+    background:
+        radial-gradient(circle at 10% 0%, rgba(56, 189, 248, 0.24), transparent 52%),
+        radial-gradient(circle at 90% 0%, rgba(129, 140, 248, 0.28), transparent 58%),
+        radial-gradient(circle at 0% 100%, rgba(16, 185, 129, 0.18), transparent 52%),
+        linear-gradient(145deg, #020617 0%, #020617 35%, #020617 48%, #020617 60%, #020617 72%, #000000 100%);
+    overflow-x: hidden; /* solo scroll vertical */
 }
-#loading {
+
+body, p, h1, h2, h3, h4, h5, h6, span, label, th, td {
+    color: #f9fafb;
+}
+.loading-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(255, 255, 255, 1);
+    inset: 0;
+    background: radial-gradient(circle at top, rgba(80, 120, 255, 0.25), rgba(0, 0, 0, 0.95));
     display: flex;
     justify-content: center;
     align-items: center;
+    z-index: 9999;
     opacity: 1;
-    transition: opacity 0.5s ease-in-out;
-}
-h4 {
-    margin: 0px;
+    transition: opacity 0.4s ease-in-out, visibility 0.4s ease-in-out;
 }
 
-.loading-image {
-    max-height: 250px;
-    height: auto;
+.loading-overlay.hidden {
+    opacity: 0;
+    visibility: hidden;
 }
-#graficos-container{
-    display: none;
-    width: 100%;
-    height: 100%;
-}
-#title {
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
-    z-index: 1;
-    position: fixed;
+
+.loading-content {
     text-align: center;
-    background-color: #800404;
-    color: white;
-    display: none;
-}
-.mpld3-text {
-    font-weight: bold;
-    font-size: 14px;
-}
-/* Ocultar la línea vertical en el eje x */
-.tick line {
-    opacity: 0.1;
 }
 
-.row{
-    place-content: center;
+.loading-text {
+    color: #e0e7ff;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-size: 0.8rem;
 }
-/* Agregar margen de 0 al contenedor en tamaños de pantalla de celular */
+
+.app-header {
+	position: sticky;
+	top: 0;
+	z-index: 1000;
+	backdrop-filter: blur(16px);
+	background: linear-gradient(90deg, rgba(8, 47, 73, 0.9), rgba(15, 23, 42, 0.9));
+	border-bottom: 1px solid rgba(148, 163, 184, 0.25);
+	box-shadow: 0 18px 45px rgba(15, 23, 42, 0.65);
+}
+
+.header-content {
+	max-width: 1400px;
+	margin: 0 auto;
+	padding: 1rem 1.5rem;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1.5rem;
+}
+
+.header-brand {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+}
+
+.app-title {
+	font-size: 1.25rem;
+	font-weight: 700;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+}
+
+.app-subtitle {
+	font-size: 0.85rem;
+	color: #9ca3af;
+}
+
+.app-nav {
+	display: flex;
+	gap: 0.5rem;
+	padding: 0.35rem;
+	background: rgba(15, 23, 42, 0.6);
+	border-radius: 999px;
+	border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.nav-tab {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.5rem 1.25rem;
+	border-radius: 999px;
+	font-size: 0.85rem;
+	font-weight: 500;
+	color: #cbd5e1;
+	text-decoration: none;
+	transition: all 0.25s ease;
+	white-space: nowrap;
+}
+
+.nav-tab i {
+	font-size: 1rem;
+}
+
+.nav-tab:hover {
+	color: #f1f5f9;
+	background: rgba(56, 189, 248, 0.15);
+}
+
+.nav-tab.active {
+	color: #f9fafb;
+	background: linear-gradient(135deg, rgba(56, 189, 248, 0.35), rgba(129, 140, 248, 0.35));
+	box-shadow: 0 4px 12px rgba(56, 189, 248, 0.25);
+}
+
 @media (max-width: 767.98px) {
-    .container {
-        margin: 0;
+	.header-content {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+	
+	.app-nav {
+		width: 100%;
+		flex-direction: column;
+		border-radius: 0.75rem;
+	}
+	
+	.nav-tab {
+		width: 100%;
+		justify-content: center;
+	}
+}.app-main {
+    padding: 1.5rem 1rem 2.5rem;
+}
+
+.graphs-section {
+    max-width: 1400px;
+}
+
+.graph-card {
+    background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), rgba(15, 23, 42, 0.98));
+    border-radius: 1.25rem;
+    padding: 1.25rem 1.25rem 1rem;
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.9);
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.graph-card::before {
+    content: "";
+    position: absolute;
+    inset: -40%;
+    background: conic-gradient(from 180deg, rgba(56, 189, 248, 0.18), transparent, rgba(129, 140, 248, 0.18), transparent);
+    opacity: 0.35;
+    mix-blend-mode: screen;
+    pointer-events: none;
+}
+
+.graph-card-header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.graph-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.graph-body {
+    position: relative;
+    border-radius: 0.9rem;
+    background: radial-gradient(circle at top, rgba(15, 23, 42, 0.7), rgba(8, 11, 20, 0.9));
+    padding: 0.35rem;
+}
+
+.graph-body > div {
+    border-radius: 0.75rem;
+    overflow: hidden;
+}
+
+.table-icon {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    border-radius: 999px;
+}
+
+.table-icon i {
+    font-size: 1rem;
+}
+
+.modal-glass {
+    background: radial-gradient(circle at top left, rgba(59, 130, 246, 0.15), rgba(15, 23, 42, 0.98));
+    border-radius: 1.25rem;
+    border: 1px solid rgba(148, 163, 184, 0.4);
+    box-shadow: 0 24px 80px rgba(15, 23, 42, 0.95);
+}
+
+.table-dark {
+    --bs-table-bg: transparent;
+    --bs-table-striped-bg: rgba(15, 23, 42, 0.85);
+    --bs-table-striped-color: #e5e7eb;
+    --bs-table-hover-bg: rgba(30, 64, 175, 0.85);
+    --bs-table-hover-color: #f9fafb;
+}
+
+.mpld3-text {
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.tick line {
+    opacity: 0.12;
+}
+
+/* Forzar números y textos de ejes mpld3 a blanco sobre fondo oscuro */
+.mpld3-baseaxes text {
+    fill: #f9fafb !important;
+}
+
+/* Iconos y fondo de la barra de herramientas mpld3 en blanco/transparente */
+.mpld3-toolbar {
+    opacity: 1 !important;
+}
+
+.mpld3-toolbar rect {
+    fill: transparent !important;
+    stroke: transparent !important;
+}
+
+/* paths y textos de los iconos: blanco fuerte */
+.mpld3-toolbar path,
+.mpld3-toolbar text {
+    fill: #ffffff !important;
+    stroke: #ffffff !important;
+}
+
+/* por si los iconos están dentro de <g> genéricos */
+.mpld3-toolbar * {
+    color: #ffffff !important;
+}
+
+/* Fuerza definitiva: iconos mpld3 (home, pan, zoom) en blanco */
+g[id^="mpld3-toolbar"] path,
+g[id^="mpld3-toolbar"] text {
+    fill: #ffffff !important;
+    stroke: #ffffff !important;
+}
+
+.row {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+@media (max-width: 767.98px) {
+    .app-main {
+        padding-inline: 0.75rem;
+    }
+
+    .graph-card {
+        border-radius: 1rem;
+        padding-inline: 1rem;
     }
 }
-.table-icon {
-    display: inline-block;
-    color: #007bff;
-    text-decoration: none;
-    transition: background-color 0.3s ease;
-    cursor: pointer;
-    font-size: 1em;
-    margin-right: 620px;
+
+/* Estilos para páginas de contenido (diagramas) */
+.content-section {
+    max-width: 1400px;
 }
 
-.table-icon:hover {
-    color: #0056b3;
+.content-card {
+    background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), rgba(15, 23, 42, 0.98));
+    border-radius: 1.25rem;
+    padding: 2rem;
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.9);
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.content-card::before {
+    content: "";
+    position: absolute;
+    inset: -40%;
+    background: conic-gradient(from 180deg, rgba(56, 189, 248, 0.18), transparent, rgba(129, 140, 248, 0.18), transparent);
+    opacity: 0.35;
+    mix-blend-mode: screen;
+    pointer-events: none;
+}
+
+.content-header {
+    position: relative;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.content-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: #f9fafb;
+}
+
+.content-title i {
+    font-size: 1.5rem;
+    color: #38bdf8;
+}
+
+.content-description {
+    color: #94a3b8;
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+.diagram-container {
+    position: relative;
+    min-height: 500px;
+    background: radial-gradient(circle at top, rgba(15, 23, 42, 0.7), rgba(8, 11, 20, 0.9));
+    border-radius: 1rem;
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.placeholder-content {
+    text-align: center;
+    max-width: 500px;
+}
+
+.placeholder-icon {
+    font-size: 5rem;
+    color: rgba(56, 189, 248, 0.4);
+    margin-bottom: 1.5rem;
+}
+
+.placeholder-content h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #e2e8f0;
+    margin-bottom: 1rem;
+}
+
+.placeholder-content p {
+    color: #94a3b8;
+    margin-bottom: 1.5rem;
+}
+
+.placeholder-info {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
 }

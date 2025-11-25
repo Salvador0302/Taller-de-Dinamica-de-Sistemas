@@ -57,14 +57,22 @@ def controller():
                     
                     stock_data = stocks[nivel_buscado].head(10)
                     plt.figure(figsize=(10, 6))
-                    plt.plot(stocks[nivel_buscado], label=nivel_buscado, 
+                    plt.plot(stocks[nivel_buscado], label=nivel_buscado,
                              linewidth=4.0, color=i['nameColor'])
-                    plt.title(i['title'], loc='center')
-                    plt.ylabel(i['nameLabelY'])
-                    plt.xlabel(i['nameLabelX'])
-                    plt.grid()
-                    plt.legend(loc='center left', facecolor='black', 
-                               framealpha=1.0, edgecolor='black', 
+
+                    ax = plt.gca()
+                    ax.set_facecolor('#020617')
+                    # números de ejes en blanco
+                    ax.tick_params(axis='both', colors='white')
+                    for spine in ax.spines.values():
+                        spine.set_color('#64748b')
+
+                    # etiquetas de ejes en blanco
+                    ax.set_ylabel(i['nameLabelY'], color='white')
+                    ax.set_xlabel(i['nameLabelX'], color='white')
+                    plt.grid(color='#1f2937', alpha=0.6)
+                    plt.legend(loc='center left', facecolor='#020617',
+                               framealpha=0.95, edgecolor='#4b5563',
                                labelcolor='white')
                     plt_graph = mpld3.fig_to_html(plt.gcf())
                     plt.close()
