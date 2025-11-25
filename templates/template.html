@@ -1,15 +1,32 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VENSIM Dashboard</title>
+
     <link rel="icon" href="{{ url_for('static', filename='ico/icono.ico') }}" type="image/x-icon">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <!-- Bootstrap -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+        integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM"
+        crossorigin="anonymous"
+    >
+    <!-- Iconos -->
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+    >
+    <!-- Estilos propios -->
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
 </head>
 <body>
+    <!-- Overlay de carga -->
     <div id="loading" class="loading-overlay">
         <div class="loading-content">
             <div class="spinner-border text-primary" role="status"></div>
@@ -17,12 +34,14 @@
         </div>
     </div>
 
+    <!-- HEADER -->
     <header class="app-header">
         <div class="header-content">
             <div class="header-brand">
                 <div class="app-title">VENSIM TO PYTHON</div>
                 <div class="app-subtitle">Dashboard dinámico de modelos de sistemas</div>
             </div>
+
             <nav class="app-nav">
                 <a href="/diagrama-causal" class="nav-tab" data-section="causal">
                     <i class="bi bi-diagram-3"></i>
@@ -36,35 +55,79 @@
                     <i class="bi bi-bar-chart-line"></i>
                     <span>Tablas y simulación</span>
                 </a>
+                <a href="https://clinquant-dusk-5f3fd5.netlify.app/" class="nav-tab" target="_blank" rel="noopener noreferrer">
+                    <i class="bi bi-water"></i>
+                    <span>Símil Hidrodinámico</span>
+                </a>
             </nav>
         </div>
     </header>
 
+    <!-- MAIN -->
     <main id="graficos-container" class="app-main">
         <section class="graphs-section container-fluid">
-            <div class="row g-4 justify-content-center">
+            <div class="row g-4 justify-content-center" id="graphs-container">
                 {% for nivel_data in nivel.values() %}
-                    <div class="col-12 col-lg-6">
-                        <article class="graph-card">
+                    <!-- col con d-flex para igualar alturas por fila -->
+                    <div class="col-12 col-lg-6 d-flex">
+                        <!-- card estira al alto de la columna -->
+                        <article class="graph-card flex-fill">
                             <header class="graph-card-header">
                                 <h5 class="graph-title">{{ nivel_data['title'] }}</h5>
-                                <button class="btn btn-sm btn-outline-light table-icon" data-bs-toggle="modal" data-bs-target="#tablaModal{{ loop.index }}">
-                                    <i class="bi bi-table"></i>
-                                    <span class="d-none d-sm-inline">Ver datos</span>
-                                </button>
+                                <div class="graph-controls">
+                                    <button class="graph-btn" title="Zoom In" onclick="zoomGraph({{ loop.index }}, 'in')">
+                                        <i class="bi bi-zoom-in"></i>
+                                    </button>
+                                    <button class="graph-btn" title="Zoom Out" onclick="zoomGraph({{ loop.index }}, 'out')">
+                                        <i class="bi bi-zoom-out"></i>
+                                    </button>
+                                    <button class="graph-btn" title="Resetear Vista" onclick="resetGraph({{ loop.index }})">
+                                        <i class="bi bi-arrow-counterclockwise"></i>
+                                    </button>
+                                    <button class="graph-btn" title="Descargar PNG" onclick="downloadGraph({{ loop.index }})">
+                                        <i class="bi bi-download"></i>
+                                    </button>
+                                    <button
+                                        class="btn btn-sm btn-outline-light table-icon"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#tablaModal{{ loop.index }}"
+                                    >
+                                        <i class="bi bi-table"></i>
+                                        <span class="d-none d-sm-inline">Ver datos</span>
+                                    </button>
+                                </div>
                             </header>
-                            <div class="graph-body">
-                                {{ nivel_data['graph']|safe }}
+
+                            <div class="graph-body" data-graph-id="{{ loop.index }}">
+                                <!-- Contenedor extra para controlar tamaño del gráfico -->
+                                <div class="mpld3-container">
+                                    {{ nivel_data['graph']|safe }}
+                                </div>
                             </div>
                         </article>
 
-                        <div class="modal fade" id="tablaModal{{ loop.index }}" tabindex="-1" aria-labelledby="tablaModalLabel{{ loop.index }}" aria-hidden="true">
+                        <!-- MODAL TABLA -->
+                        <div
+                            class="modal fade"
+                            id="tablaModal{{ loop.index }}"
+                            tabindex="-1"
+                            aria-labelledby="tablaModalLabel{{ loop.index }}"
+                            aria-hidden="true"
+                        >
                             <div class="modal-dialog modal-dialog-centered modal-lg">
                                 <div class="modal-content modal-glass">
                                     <div class="modal-header">
-                                        <h5 class="modal-title" id="tablaModalLabel{{ loop.index }}">{{ nivel_data['title'] }}</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        <h5 class="modal-title" id="tablaModalLabel{{ loop.index }}">
+                                            {{ nivel_data['title'] }}
+                                        </h5>
+                                        <button
+                                            type="button"
+                                            class="btn-close"
+                                            data-bs-dismiss="modal"
+                                            aria-label="Close"
+                                        ></button>
                                     </div>
+
                                     <div class="modal-body">
                                         <div class="table-responsive">
                                             <table class="table table-dark table-striped table-hover align-middle mb-0">
@@ -85,20 +148,137 @@
                                             </table>
                                         </div>
                                     </div>
+
                                     <div class="modal-footer">
-                                        <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cerrar</button>
+                                        <button
+                                            type="button"
+                                            class="btn btn-outline-light"
+                                            data-bs-dismiss="modal"
+                                        >
+                                            Cerrar
+                                        </button>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                        <!-- /MODAL TABLA -->
                     </div>
                 {% endfor %}
             </div>
+
+            <!-- PANEL DE CONTROL DE PARÁMETROS -->
+            <div class="row justify-content-center mt-5">
+                <div class="col-12">
+                    <article class="control-panel">
+                        <header class="control-header">
+                            <h5 class="control-title">
+                                <i class="bi bi-sliders"></i>
+                                Parámetros del modelo
+                            </h5>
+                            <button class="btn btn-sm btn-primary" id="updateBtn">
+                                <i class="bi bi-arrow-clockwise"></i>
+                                Actualizar simulación
+                            </button>
+                        </header>
+
+                        <div class="controls-grid">
+                            <div class="control-item">
+                                <label for="tasa_inmigrantes">Tasa de inmigrantes</label>
+                                <input
+                                    type="range"
+                                    class="form-range"
+                                    id="tasa_inmigrantes"
+                                    min="0"
+                                    max="0.3"
+                                    step="0.01"
+                                    value="0.12"
+                                >
+                                <span class="control-value">0.12</span>
+                            </div>
+
+                            <div class="control-item">
+                                <label for="tasa_emigrantes">Tasa de emigrantes</label>
+                                <input
+                                    type="range"
+                                    class="form-range"
+                                    id="tasa_emigrantes"
+                                    min="0"
+                                    max="0.3"
+                                    step="0.01"
+                                    value="0.1"
+                                >
+                                <span class="control-value">0.10</span>
+                            </div>
+
+                            <div class="control-item">
+                                <label for="tasa_desempleo">Tasa de desempleo</label>
+                                <input
+                                    type="range"
+                                    class="form-range"
+                                    id="tasa_desempleo"
+                                    min="0"
+                                    max="0.5"
+                                    step="0.01"
+                                    value="0.14"
+                                >
+                                <span class="control-value">0.14</span>
+                            </div>
+
+                            <div class="control-item">
+                                <label for="tasa_nuevos_delincuentes">Tasa de nuevos delincuentes</label>
+                                <input
+                                    type="range"
+                                    class="form-range"
+                                    id="tasa_nuevos_delincuentes"
+                                    min="0"
+                                    max="0.5"
+                                    step="0.01"
+                                    value="0.21"
+                                >
+                                <span class="control-value">0.21</span>
+                            </div>
+
+                            <div class="control-item">
+                                <label for="tasa_muertes">Tasa de muertes</label>
+                                <input
+                                    type="range"
+                                    class="form-range"
+                                    id="tasa_muertes"
+                                    min="0"
+                                    max="0.5"
+                                    step="0.01"
+                                    value="0.18"
+                                >
+                                <span class="control-value">0.18</span>
+                            </div>
+
+                            <div class="control-item">
+                                <label for="tasa_policias_contratados">Tasa de policías contratados</label>
+                                <input
+                                    type="range"
+                                    class="form-range"
+                                    id="tasa_policias_contratados"
+                                    min="0"
+                                    max="0.5"
+                                    step="0.01"
+                                    value="0.15"
+                                >
+                                <span class="control-value">0.15</span>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
         </section>
     </main>
+
+    <!-- JS Bootstrap + script propio -->
+    <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+        crossorigin="anonymous"
+    ></script>
+
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js" integrity="sha384-fbbOQedDUMZZ5KreZpsbe1LCZPVmfTnH7ois6mU1QK+m14rQ1l2bGBq41eYeM/fS" crossorigin="anonymous"></script>
 </body>
 </html>
