@@ -20,11 +20,15 @@ class AIAssistant:
             provider: 'openai', 'anthropic' o 'gemini'
         """
         self.provider = provider
-        # Priorizar Gemini con la API key proporcionada
+        # Leer API key desde variables de entorno o parámetro
         if provider == "gemini":
-            self.api_key = "AIzaSyCwY35lVkIW72DjUi2O7MO9Xeze1rge3Qs"
+            self.api_key = api_key or os.getenv('GEMINI_API_KEY')
+        elif provider == "openai":
+            self.api_key = api_key or os.getenv('OPENAI_API_KEY')
+        elif provider == "anthropic":
+            self.api_key = api_key or os.getenv('ANTHROPIC_API_KEY')
         else:
-            self.api_key = api_key or os.getenv('OPENAI_API_KEY') or os.getenv('ANTHROPIC_API_KEY')
+            self.api_key = api_key
         self.conversation_history = []
         self.client = None
         
@@ -44,7 +48,12 @@ class AIAssistant:
                     test = self.client.generate_content("test")
                     print("✅ Gemini AI 2.5 Flash inicializado correctamente")
                 except Exception as e:
-                    print(f"⚠️  Gemini API key no válida o expirada: {e}")
+                    msg = str(e)
+                    if 'leaked' in msg.lower() or '403' in msg:
+                        print(f"⚠️  Gemini API key rechazada (posible key filtrada o revocada): {e}")
+                        print("🔐 Por seguridad, genera una nueva API key desde Google AI Studio y configura la variable de entorno 'GEMINI_API_KEY'.")
+                    else:
+                        print(f"⚠️  Error inicializando Gemini: {e}")
                     print("📊 Usando modo de análisis estadístico básico")
                     self.client = None
             elif self.provider == "openai":
@@ -361,7 +370,17 @@ Responde en formato JSON con esta estructura:
 
 
 # Instancia global del asistente
-ai_assistant = AIAssistant()
+# Permitir seleccionar proveedor y key vía variables de entorno para evitar hardcodear
+_provider = os.getenv('AI_PROVIDER', 'gemini')
+_api_key = None
+if _provider == 'gemini':
+    _api_key = os.getenv('GEMINI_API_KEY')
+elif _provider == 'openai':
+    _api_key = os.getenv('OPENAI_API_KEY')
+elif _provider == 'anthropic':
+    _api_key = os.getenv('ANTHROPIC_API_KEY')
+
+ai_assistant = AIAssistant(api_key=_api_key, provider=_provider)
 
 
 def analyze_simulation(simulation_data: Dict, parameters: Dict) -> Dict:

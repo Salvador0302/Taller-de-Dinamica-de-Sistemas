@@ -2,6 +2,10 @@ import os
 import ssl
 import mysql.connector
 from flask import Flask
+from dotenv import load_dotenv
+
+# Cargar variables de entorno desde .env
+load_dotenv()
 
 # Asegurar que el directorio de trabajo sea el del script
 script_dir = os.path.dirname(os.path.abspath(__file__))
