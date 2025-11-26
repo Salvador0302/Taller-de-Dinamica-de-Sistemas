@@ -1,26 +1,92 @@
-# Ignore Python bytecode and caches
+# Python
 __pycache__/
+*.py[cod]
+*$py.class
+*.so
 *.pyc
 *.pyo
 *.pyd
-*$py.class
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
 
-# Ignore virtual environments (root or nested)
+# Virtual Environment
 venv/
-.venv/
-env/
 ENV/
+env/
+.venv/
 pythonenv*/
 vensim_python_web/venv/
 
-# Optional: ignore test caches
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment variables
+.env
+.flaskenv
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+logs/
+
+# Flask
+instance/
+.webassets-cache
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Test and Coverage
 .pytest_cache/
 .tox/
 .nox/
-
-# Optional: ignore coverage data
-.coverage*
+.coverage
+.coverage.*
 htmlcov/
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
 
-# Optional: common editor folders
-.vscode/
+# OS
+Thumbs.db
+.DS_Store
+
+# Ngrok
+ngrok.exe
+ngrok.yml
+Cuenta Ngrok.txt
+
+# Backup files
+*.bak
+Backup/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
