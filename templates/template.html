@@ -24,6 +24,9 @@
         rel="stylesheet"
         href="{{ url_for('static', filename='css/style.css') }}"
     >
+    
+    <!-- Plotly.js para gráficos interactivos -->
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js" charset="utf-8"></script>
 </head>
 <body>
     <!-- Overlay de carga -->
@@ -42,51 +45,85 @@
                 <div class="app-subtitle">Dashboard dinámico de modelos de sistemas</div>
             </div>
 
-            <nav class="app-nav">
-                <a href="/diagrama-causal" class="nav-tab" data-section="causal">
-                    <i class="bi bi-diagram-3"></i>
-                    <span>Diagrama causal</span>
-                </a>
-                <a href="/diagrama-forrester" class="nav-tab" data-section="forrester">
-                    <i class="bi bi-share"></i>
-                    <span>Diagrama de Forrester</span>
-                </a>
-                <a href="/" class="nav-tab active" data-section="simulacion">
-                    <i class="bi bi-bar-chart-line"></i>
-                    <span>Tablas y simulación</span>
-                </a>
-                <a href="https://clinquant-dusk-5f3fd5.netlify.app/" class="nav-tab" target="_blank" rel="noopener noreferrer">
-                    <i class="bi bi-water"></i>
-                    <span>Símil Hidrodinámico</span>
-                </a>
-            </nav>
+            <div class="header-actions">
+                <nav class="app-nav">
+                    <a href="/diagrama-causal" class="nav-tab" data-section="causal">
+                        <i class="bi bi-diagram-3"></i>
+                        <span>Diagrama causal</span>
+                    </a>
+                    <a href="/diagrama-forrester" class="nav-tab" data-section="forrester">
+                        <i class="bi bi-share"></i>
+                        <span>Diagrama de Forrester</span>
+                    </a>
+                    <a href="/" class="nav-tab active" data-section="simulacion">
+                        <i class="bi bi-bar-chart-line"></i>
+                        <span>Tablas y simulación</span>
+                    </a>
+                    <a href="https://clinquant-dusk-5f3fd5.netlify.app/" class="nav-tab" target="_blank" rel="noopener noreferrer">
+                        <i class="bi bi-water"></i>
+                        <span>Símil Hidrodinámico</span>
+                    </a>
+                </nav>
+
+                <!-- Toggle de Tema -->
+                <div class="theme-toggle" id="themeToggle" title="Cambiar tema">
+                    <i class="bi bi-moon-stars theme-toggle-icon moon"></i>
+                    <div class="theme-toggle-slider">
+                        <i class="bi bi-circle-fill"></i>
+                    </div>
+                    <i class="bi bi-sun-fill theme-toggle-icon sun"></i>
+                </div>
+            </div>
         </div>
     </header>
 
     <!-- MAIN -->
     <main id="graficos-container" class="app-main">
         <section class="graphs-section container-fluid">
+            
+            <!-- Dashboard de Métricas KPI -->
+            <div class="row g-3 mb-4" id="kpi-dashboard">
+                <div class="col-12">
+                    <h3 class="section-title">
+                        <i class="bi bi-speedometer2"></i>
+                        Métricas Clave del Sistema
+                    </h3>
+                </div>
+                
+                {% set kpi_data = [
+                    {'id': 'kpi-delincuentes', 'icon': 'exclamation-triangle-fill', 'label': 'Delincuentes en Calle', 'value': '50,000', 'trend': '+5.2%', 'trendType': 'negative', 'color': 'error'},
+                    {'id': 'kpi-policias', 'icon': 'shield-fill-check', 'label': 'Policías en Servicio', 'value': '10,000', 'trend': '+12.5%', 'trendType': 'positive', 'color': 'success'},
+                    {'id': 'kpi-desempleados', 'icon': 'people-fill', 'label': 'Inmigrantes Desempleados', 'value': '30,000', 'trend': '-3.1%', 'trendType': 'positive', 'color': 'warning'},
+                    {'id': 'kpi-poblacion', 'icon': 'person-fill', 'label': 'Población Inmigrante', 'value': '60,000', 'trend': '+8.7%', 'trendType': 'neutral', 'color': 'primary'}
+                ] %}
+                
+                {% for kpi in kpi_data %}
+                <div class="col-6 col-lg-3">
+                    <div class="kpi-card kpi-{{ kpi.color }}" data-kpi-id="{{ kpi.id }}">
+                        <div class="kpi-icon">
+                            <i class="bi bi-{{ kpi.icon }}"></i>
+                        </div>
+                        <div class="kpi-content">
+                            <div class="kpi-label">{{ kpi.label }}</div>
+                            <div class="kpi-value" id="{{ kpi.id }}-value">{{ kpi.value }}</div>
+                            <div class="kpi-trend {{ kpi.trendType }}">
+                                <i class="bi bi-{{ 'arrow-up' if kpi.trendType == 'positive' or kpi.trendType == 'negative' and kpi.trend.startswith('+') else 'arrow-down' }}"></i>
+                                <span id="{{ kpi.id }}-trend">{{ kpi.trend }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Gráficos de Simulación -->
             <div class="row g-4 justify-content-center" id="graphs-container">
                 {% for nivel_data in nivel.values() %}
-                    <!-- col con d-flex para igualar alturas por fila -->
                     <div class="col-12 col-lg-6 d-flex">
-                        <!-- card estira al alto de la columna -->
                         <article class="graph-card flex-fill">
                             <header class="graph-card-header">
                                 <h5 class="graph-title">{{ nivel_data['title'] }}</h5>
                                 <div class="graph-controls">
-                                    <button class="graph-btn" title="Zoom In" onclick="zoomGraph({{ loop.index }}, 'in')">
-                                        <i class="bi bi-zoom-in"></i>
-                                    </button>
-                                    <button class="graph-btn" title="Zoom Out" onclick="zoomGraph({{ loop.index }}, 'out')">
-                                        <i class="bi bi-zoom-out"></i>
-                                    </button>
-                                    <button class="graph-btn" title="Resetear Vista" onclick="resetGraph({{ loop.index }})">
-                                        <i class="bi bi-arrow-counterclockwise"></i>
-                                    </button>
-                                    <button class="graph-btn" title="Descargar PNG" onclick="downloadGraph({{ loop.index }})">
-                                        <i class="bi bi-download"></i>
-                                    </button>
                                     <button
                                         class="btn btn-sm btn-outline-light table-icon"
                                         data-bs-toggle="modal"
@@ -98,11 +135,8 @@
                                 </div>
                             </header>
 
-                            <div class="graph-body" data-graph-id="{{ loop.index }}">
-                                <!-- Contenedor extra para controlar tamaño del gráfico -->
-                                <div class="mpld3-container">
-                                    {{ nivel_data['graph']|safe }}
-                                </div>
+                            <div class="graph-body" id="graph-{{ loop.index }}">
+                                <!-- Plotly renderizará aquí -->
                             </div>
                         </article>
 
@@ -170,18 +204,47 @@
             <div class="row justify-content-center mt-5">
                 <div class="col-12">
                     <article class="control-panel">
-                        <header class="control-header">
-                            <h5 class="control-title">
-                                <i class="bi bi-sliders"></i>
-                                Parámetros del modelo
-                            </h5>
-                            <button class="btn btn-sm btn-primary" id="updateBtn">
-                                <i class="bi bi-arrow-clockwise"></i>
-                                Actualizar simulación
+                <div class="control-header">
+                    <h5 class="control-title">
+                        <i class="bi bi-sliders"></i>
+                        Parámetros del modelo
+                    </h5>
+                    <div class="control-actions">
+                        <button class="btn btn-sm btn-primary" id="updateBtn">
+                            <i class="bi bi-arrow-clockwise"></i>
+                            Actualizar simulación
+                        </button>
+                        
+                        <!-- Botón de Escenarios -->
+                        <button class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#scenarioModal">
+                            <i class="bi bi-diagram-3"></i>
+                            Escenarios
+                        </button>
+                        
+                        <!-- Dropdown de Exportación -->
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-download"></i>
+                                Exportar
                             </button>
-                        </header>
-
-                        <div class="controls-grid">
+                            <ul class="dropdown-menu dropdown-menu-dark">
+                                <li><a class="dropdown-item" href="#" onclick="exportData('excel')">
+                                    <i class="bi bi-file-earmark-excel"></i> Excel (.xlsx)
+                                </a></li>
+                                <li><a class="dropdown-item" href="#" onclick="exportData('csv')">
+                                    <i class="bi bi-filetype-csv"></i> CSV
+                                </a></li>
+                                <li><a class="dropdown-item" href="#" onclick="exportData('pdf')">
+                                    <i class="bi bi-file-earmark-pdf"></i> PDF Report
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#" onclick="exportAllGraphs()">
+                                    <i class="bi bi-images"></i> Todos los gráficos (PNG)
+                                </a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>                        <div class="controls-grid">
                             <div class="control-item">
                                 <label for="tasa_inmigrantes">Tasa de inmigrantes</label>
                                 <input
@@ -272,7 +335,183 @@
         </section>
     </main>
 
-    <!-- JS Bootstrap + script propio -->
+    <!-- ==================== MODAL DE ESCENARIOS ==================== -->
+    <div class="modal fade" id="scenarioModal" tabindex="-1" aria-labelledby="scenarioModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="scenarioModalLabel">
+                        <i class="bi bi-diagram-3"></i>
+                        Gestión de Escenarios
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Pestañas -->
+                    <ul class="nav nav-tabs mb-3" id="scenarioTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="create-tab" data-bs-toggle="tab" data-bs-target="#create-panel" type="button" role="tab">
+                                <i class="bi bi-plus-circle"></i> Crear Escenario
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="list-tab" data-bs-toggle="tab" data-bs-target="#list-panel" type="button" role="tab">
+                                <i class="bi bi-list-ul"></i> Mis Escenarios
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="compare-tab" data-bs-toggle="tab" data-bs-target="#compare-panel" type="button" role="tab">
+                                <i class="bi bi-bar-chart-line"></i> Comparar
+                            </button>
+                        </li>
+                    </ul>
+                    
+                    <!-- Contenido de pestañas -->
+                    <div class="tab-content" id="scenarioTabsContent">
+                        <!-- Panel: Crear Escenario -->
+                        <div class="tab-pane fade show active" id="create-panel" role="tabpanel">
+                            <form id="createScenarioForm">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="scenarioName" class="form-label">Nombre del Escenario</label>
+                                        <input type="text" class="form-control" id="scenarioName" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="scenarioDescription" class="form-label">Descripción</label>
+                                        <input type="text" class="form-control" id="scenarioDescription">
+                                    </div>
+                                </div>
+                                
+                                <div class="alert alert-info">
+                                    <i class="bi bi-info-circle"></i>
+                                    Los parámetros actuales serán guardados con este escenario.
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-save"></i> Guardar Escenario
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <!-- Panel: Lista de Escenarios -->
+                        <div class="tab-pane fade" id="list-panel" role="tabpanel">
+                            <div id="scenariosList" class="scenarios-grid">
+                                <!-- Se llenará dinámicamente -->
+                            </div>
+                        </div>
+                        
+                        <!-- Panel: Comparar Escenarios -->
+                        <div class="tab-pane fade" id="compare-panel" role="tabpanel">
+                            <div class="mb-3">
+                                <label class="form-label">Selecciona escenarios para comparar (mínimo 2):</label>
+                                <div id="compareScenariosList" class="compare-scenarios-list">
+                                    <!-- Se llenará dinámicamente -->
+                                </div>
+                            </div>
+                            <button id="compareBtn" class="btn btn-success" disabled>
+                                <i class="bi bi-bar-chart-line"></i> Comparar Escenarios
+                            </button>
+                            
+                            <!-- Área de resultados de comparación -->
+                            <div id="comparisonResults" class="mt-4" style="display: none;">
+                                <h6>Resultados de Comparación</h6>
+                                <div id="comparisonCharts"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== ASISTENTE AI FLOTANTE ==================== -->
+    <div class="ai-assistant-container" id="aiAssistant">
+        <div class="ai-assistant-toggle" id="aiToggle" onclick="toggleAIAssistant()">
+            <i class="bi bi-robot"></i>
+            <span>AI</span>
+        </div>
+        
+        <div class="ai-assistant-panel" id="aiPanel">
+            <div class="ai-header">
+                <div class="ai-header-content">
+                    <i class="bi bi-robot"></i>
+                    <h6>Asistente AI</h6>
+                </div>
+                <div class="ai-header-actions">
+                    <button class="btn btn-sm btn-outline-light" onclick="AIAssistantManager.analyzeSimulation()" title="Analizar simulación">
+                        <i class="bi bi-graph-up"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-light" onclick="AIAssistantManager.clearChat()" title="Limpiar chat">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                    <button class="btn-close btn-close-white" onclick="toggleAIAssistant()"></button>
+                </div>
+            </div>
+            
+            <div class="ai-chat-container" id="aiChatContainer">
+                <div class="ai-welcome-message">
+                    <i class="bi bi-stars"></i>
+                    <h6>¡Hola! Soy tu asistente AI</h6>
+                    <div class="alert alert-success" style="font-size: 0.875rem; margin: 1rem 0;">
+                        <i class="bi bi-check-circle-fill"></i>
+                        <strong>Gemini 2.5 Flash Activo</strong><br>
+                        Inteligencia artificial conversacional lista para ayudarte con análisis avanzados.
+                    </div>
+                    <p>Puedo ayudarte a:</p>
+                    <ul>
+                        <li>Analizar resultados de simulaciones</li>
+                        <li>Sugerir ajustes de parámetros</li>
+                        <li>Explicar tendencias y relaciones</li>
+                        <li>Responder tus preguntas</li>
+                    </ul>
+                    <div class="ai-quick-actions">
+                        <button class="btn btn-sm btn-primary" onclick="AIAssistantManager.analyzeSimulation()">
+                            <i class="bi bi-graph-up"></i> Analizar Simulación
+                        </button>
+                        <button class="btn btn-sm btn-info" onclick="AIAssistantManager.showSuggestionForm()">
+                            <i class="bi bi-lightbulb"></i> Sugerir Parámetros
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="ai-input-container">
+                <div class="ai-suggestion-form" id="aiSuggestionForm" style="display: none;">
+                    <label>¿Cuál es tu objetivo?</label>
+                    <select class="form-select form-select-sm mb-2" id="aiGoalSelect">
+                        <option value="reducir delincuencia">Reducir delincuencia</option>
+                        <option value="optimizar recursos policiales">Optimizar recursos policiales</option>
+                        <option value="controlar inmigración">Controlar inmigración</option>
+                        <option value="reducir desempleo">Reducir desempleo</option>
+                        <option value="equilibrar el sistema">Equilibrar el sistema</option>
+                        <option value="otro">Otro (especificar en el chat)</option>
+                    </select>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-success" onclick="AIAssistantManager.requestSuggestions()">
+                            <i class="bi bi-send"></i> Obtener Sugerencias
+                        </button>
+                        <button class="btn btn-sm btn-secondary" onclick="AIAssistantManager.hideSuggestionForm()">
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="ai-input-wrapper">
+                    <input 
+                        type="text" 
+                        class="form-control" 
+                        id="aiInput" 
+                        placeholder="Pregúntame algo sobre la simulación..."
+                        onkeypress="if(event.key==='Enter') AIAssistantManager.sendMessage()"
+                    >
+                    <button class="btn btn-primary" onclick="AIAssistantManager.sendMessage()">
+                        <i class="bi bi-send"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script
         src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
@@ -280,5 +519,51 @@
     ></script>
 
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    
+    <!-- Renderizar gráficos Plotly iniciales -->
+    <script>
+        // Datos de la simulación inicial
+        const initialData = {
+            {% for key, nivel_data in nivel.items() %}
+                '{{ key }}': {
+                    data: {{ nivel_data['data']|tojson }},
+                    title: '{{ nivel_data["title"] }}',
+                    xlabel: '{{ nivel_data["xlabel"] }}',
+                    ylabel: '{{ nivel_data["ylabel"] }}'
+                }{% if not loop.last %},{% endif %}
+            {% endfor %}
+        };
+        
+        // Renderizar gráficos al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            {% for nivel_data in nivel.values() %}
+                (function() {
+                    const plotData = {{ nivel_data['plot_json']|safe }};
+                    const config = {
+                        responsive: true,
+                        displayModeBar: true,
+                        displaylogo: false,
+                        modeBarButtonsToAdd: ['pan2d', 'zoom2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'resetScale2d'],
+                        modeBarButtonsToRemove: ['select2d', 'lasso2d'],
+                        toImageButtonOptions: {
+                            format: 'png',
+                            filename: '{{ nivel_data["title"] }}'.replace(/\s+/g, '_'),
+                            height: 600,
+                            width: 1000,
+                            scale: 2
+                        }
+                    };
+                    Plotly.newPlot('graph-{{ loop.index }}', plotData.data, plotData.layout, config);
+                })();
+            {% endfor %}
+            
+            // Inicializar KPIs con datos iniciales
+            setTimeout(() => {
+                if (typeof updateKPIs === 'function') {
+                    updateKPIs(initialData);
+                }
+            }, 500);
+        });
+    </script>
 </body>
 </html>

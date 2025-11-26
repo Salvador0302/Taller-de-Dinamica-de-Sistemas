@@ -1,14 +1,9 @@
 from src.Models.model import getModelAll
 import pysd
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-import urllib3
 import os
-import mpld3
-from decouple import config
-import base64
-from io import BytesIO
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+import json
 
 
 def controller(params=None):
@@ -98,76 +93,117 @@ def controller(params=None):
                     # Datos completos para el gráfico
                     full_data = stocks[nivel_buscado]
 
-                    # FIGURA: compacta, con más altura y más margen inferior
-                    fig, ax = plt.subplots(figsize=(7, 4.8))
-
-                    ax.plot(
-                        full_data,
-                        label=nivel_buscado,
-                        linewidth=3.0,
-                        color=i['nameColor']
-                    )
-
-                    ax.set_facecolor('#020617')
-
-                    # números de ejes en blanco
-                    ax.tick_params(axis='both', colors='white')
-                    for spine in ax.spines.values():
-                        spine.set_color('#64748b')
-
-                    # Ajustar límites del eje Y para evitar desbordamiento
-                    y_min = full_data.min()
-                    y_max = full_data.max()
-                    y_range = y_max - y_min
-                    margin = y_range * 0.1 if y_range != 0 else 1  # 10% de margen
-                    ax.set_ylim(y_min - margin, y_max + margin)
-
-                    # etiquetas de ejes en blanco
-                    ax.set_ylabel(i['nameLabelY'], color='white')
-                    ax.set_xlabel(i['nameLabelX'], color='white', labelpad=12)
-
-                    ax.grid(color='#1f2937', alpha=0.6)
-
-                    legend = ax.legend(
-                        loc='center left',
-                        facecolor='#020617',
-                        framealpha=0.95,
-                        edgecolor='#4b5563'
-                    )
-                    # color de texto de la leyenda
-                    for text in legend.get_texts():
-                        text.set_color('white')
-
-                    # Margenes manuales: más espacio abajo para ticks + label del eje X
-                    fig.subplots_adjust(
-                        left=0.12,
-                        right=0.97,
-                        top=0.95,
-                        bottom=0.30   # <- margen inferior más grande
-                    )
-
-                    # Agregar plugins interactivos de mpld3
-                    plugins_list = [
-                        mpld3.plugins.Reset(),
-                        mpld3.plugins.BoxZoom(button=True),
-                        mpld3.plugins.MousePosition(fontsize=12)
-                    ]
+                    # Obtener datos para el gráfico
+                    x_data = full_data.index.values.tolist()
+                    y_data = full_data.values.tolist()
                     
-                    for plugin in plugins_list:
-                        mpld3.plugins.connect(fig, plugin)
+                    print(f"DEBUG: Generando gráfico para {nivel_buscado}")
+                    print(f"  X data (primeros 5): {x_data[:5]}")
+                    print(f"  Y data (primeros 5): {y_data[:5]}")
+                    print(f"  Total puntos: {len(x_data)}")
 
-                    plt_graph = mpld3.fig_to_html(fig)
-                    plt.close(fig)
+                    # CREAR GRÁFICO INTERACTIVO CON PLOTLY
+                    fig = go.Figure()
+                    
+                    # Agregar línea principal
+                    fig.add_trace(go.Scatter(
+                        x=x_data,
+                        y=y_data,
+                        mode='lines',
+                        name=nivel_buscado,
+                        line=dict(
+                            color=i['nameColor'],
+                            width=3
+                        ),
+                        hovertemplate='<b>%{fullData.name}</b><br>' +
+                                    i['nameLabelX'] + ': %{x:.2f}<br>' +
+                                    i['nameLabelY'] + ': %{y:.2f}<br>' +
+                                    '<extra></extra>'
+                    ))
+                    
+                    # Configurar layout con tema oscuro (por defecto)
+                    # El JavaScript se encargará de cambiar los colores según el tema seleccionado
+                    fig.update_layout(
+                        title=dict(
+                            text=i['title'],
+                            font=dict(size=16, color='white', family='Arial, sans-serif'),
+                            x=0.5,
+                            xanchor='center'
+                        ),
+                        xaxis=dict(
+                            title=dict(
+                                text=i['nameLabelX'],
+                                font=dict(size=12, color='white')
+                            ),
+                            showgrid=True,
+                            gridcolor='rgba(31, 41, 55, 0.6)',
+                            gridwidth=1,
+                            zeroline=True,
+                            zerolinecolor='rgba(100, 116, 139, 0.5)',
+                            color='white',
+                            tickfont=dict(size=10, color='white'),
+                            showline=True,
+                            linewidth=1,
+                            linecolor='rgba(100, 116, 139, 0.8)'
+                        ),
+                        yaxis=dict(
+                            title=dict(
+                                text=i['nameLabelY'],
+                                font=dict(size=12, color='white')
+                            ),
+                            showgrid=True,
+                            gridcolor='rgba(31, 41, 55, 0.6)',
+                            gridwidth=1,
+                            zeroline=True,
+                            zerolinecolor='rgba(100, 116, 139, 0.5)',
+                            color='white',
+                            tickfont=dict(size=10, color='white'),
+                            showline=True,
+                            linewidth=1,
+                            linecolor='rgba(100, 116, 139, 0.8)'
+                        ),
+                        plot_bgcolor='rgba(2, 6, 23, 0)',  # Transparente para heredar del contenedor
+                        paper_bgcolor='rgba(2, 6, 23, 0)',  # Transparente
+                        font=dict(
+                            family='Arial, sans-serif',
+                            color='white'
+                        ),
+                        hovermode='closest',
+                        showlegend=True,
+                        legend=dict(
+                            bgcolor='rgba(2, 6, 23, 0.95)',
+                            bordercolor='rgba(75, 85, 99, 0.8)',
+                            borderwidth=1,
+                            font=dict(size=10, color='white'),
+                            x=0.02,
+                            y=0.98,
+                            xanchor='left',
+                            yanchor='top'
+                        ),
+                        margin=dict(l=60, r=30, t=60, b=60),
+                        height=400,
+                        # Configuración de interactividad
+                        dragmode='pan',
+                        hoversubplots='axis'
+                    )
+                    
+                    # Configurar interactividad: zoom, pan, reset
+                    fig.update_xaxes(fixedrange=False)
+                    fig.update_yaxes(fixedrange=False)
+                    
+                    # Convertir a JSON para pasar al frontend
+                    plot_json = fig.to_json()
 
-                    # Convertir datos a formato serializable
+                    # Convertir datos a formato serializable para la tabla
                     data_dict = {str(k): float(v) for k, v in stock_data.items()}
 
                     nivel[nivel_buscado] = {
                         'data': data_dict,
-                        'graph': plt_graph,
+                        'plot_json': plot_json,
                         'title': i['title'],
                         'ylabel': i['nameLabelY'],
                         'xlabel': i['nameLabelX'],
+                        'color': i['nameColor']
                     }
                 except Exception as e:
                     error_message = [{
