@@ -238,10 +238,56 @@ function updateGraphs(data) {
     }
     
     graphsContainer.innerHTML = '';
+
+    // Clear/update indicators area (if present)
+    const indicatorsDiv = document.getElementById('indicators-graph');
+    const indicadorTableBody = document.querySelector('#tablaModalIndicadores tbody');
+    if (indicatorsDiv) indicatorsDiv.innerHTML = '';
+    if (indicadorTableBody) indicadorTableBody.innerHTML = '';
     
     let index = 1;
     
     for (const [key, value] of Object.entries(data)) {
+        // Si se trata del objeto 'Indicadores de Seguridad' lo manejamos en la sección dedicada
+        if (key === 'Indicadores de Seguridad') {
+            try {
+                if (indicatorsDiv && value.plot_json) {
+                    const plotData = JSON.parse(value.plot_json);
+                    const config = {
+                        responsive: true,
+                        displayModeBar: true,
+                        displaylogo: false,
+                        modeBarButtonsToAdd: ['pan2d', 'zoom2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'resetScale2d'],
+                        modeBarButtonsToRemove: ['select2d', 'lasso2d'],
+                        toImageButtonOptions: {
+                            format: 'png',
+                            filename: (value.title || 'Indicadores').replace(/\s+/g, '_'),
+                            height: 600,
+                            width: 1000,
+                            scale: 2
+                        }
+                    };
+                    Plotly.newPlot('indicators-graph', plotData.data, plotData.layout, config);
+                }
+
+                // Llenar tabla de indicadores si viene el detalle
+                if (indicadorTableBody && value.data) {
+                    indicadorTableBody.innerHTML = Object.entries(value.data).map(([time, row]) => `
+                        <tr>
+                            <td>${time}</td>
+                            <td>${parseFloat(row.Delincuentes_por_policia).toFixed(2)}</td>
+                            <td>${parseFloat(row.Fraccion_arrestos).toFixed(4)}</td>
+                            <td>${parseFloat(row.Indice_seguridad).toFixed(2)}</td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (err) {
+                console.warn('No se pudo renderizar indicadores:', err);
+            }
+
+            // saltar la lógica normal de creación de cards
+            continue;
+        }
         const col = document.createElement('div');
         col.className = 'col-12 col-lg-6 d-flex';
         

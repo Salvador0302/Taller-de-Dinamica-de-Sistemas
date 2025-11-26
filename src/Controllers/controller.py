@@ -1,4 +1,5 @@
 from src.Models.model import getModelAll
+import numpy as np
 import pysd
 import os
 import plotly.graph_objects as go
@@ -213,6 +214,90 @@ def controller(params=None):
                         )
                     }]
                     return error_message
+            # === CALCULAR INDICADORES DE SEGURIDAD A PARTIR DE VARIABLES DE NIVEL Y FLUJO ===
+            try:
+                # Verificar que las variables necesarias existen
+                needed = ['Delincuentes en la calle', 'Policias en servicio', 'Delincuentes arrestados']
+                if all(name in stocks.columns for name in needed):
+                    t = stocks.index.values.tolist()
+
+                    criminals = stocks['Delincuentes en la calle'].astype(float)
+                    police = stocks['Policias en servicio'].astype(float)
+                    arrests = stocks['Delincuentes arrestados'].astype(float)
+
+                    # Indicador 1: Delincuentes por policía (mayor -> peor seguridad)
+                    criminals_per_police = (criminals / police.replace(0, np.nan)).replace([np.inf, -np.inf], np.nan).fillna(0.0)
+
+                    # Indicador 2: Fracción de arrestos (arrests / criminals) -> 0..1 better higher
+                    arrest_fraction = arrests / (criminals + 1e-9)
+                    arrest_fraction = arrest_fraction.replace([np.inf, -np.inf], np.nan).fillna(0.0)
+
+                    # Normalizar para combinar en un índice compuesto
+                    def normalize(series):
+                        mn = series.min()
+                        mx = series.max()
+                        denom = (mx - mn) if (mx - mn) != 0 else 1e-9
+                        return (series - mn) / denom
+
+                    n_cp = normalize(criminals_per_police)
+                    n_af = normalize(arrest_fraction)
+
+                    # Security index: combinación (0..100) — a mayor arrest_fraction y menor criminals_per_police => mayor seguridad
+                    security_index = (0.6 * (1 - n_cp) + 0.4 * n_af) * 100
+                    security_index = security_index.clip(lower=0.0, upper=100.0)
+
+                    # Preparar figura con Plotly (varias trazas en un solo gráfico)
+                    fig_ind = go.Figure()
+                    fig_ind.add_trace(go.Scatter(x=t, y=criminals_per_police.tolist(), mode='lines', name='Delincuentes / Policía', line=dict(color='#f97316', width=3)))
+                    fig_ind.add_trace(go.Scatter(x=t, y=arrest_fraction.tolist(), mode='lines', name='Fracción arrestos', line=dict(color='#10b981', width=3)))
+                    fig_ind.add_trace(go.Scatter(x=t, y=security_index.tolist(), mode='lines', name='Índice de Seguridad', line=dict(color='#3b82f6', width=3)))
+
+                    fig_ind.update_layout(
+                        title=dict(text='Indicadores de Seguridad', x=0.5, xanchor='center', font=dict(size=16, color='white')),
+                        xaxis=dict(title=dict(text='Meses', font=dict(color='white'))),
+                        yaxis=dict(title=dict(text='Valor', font=dict(color='white'))),
+                        plot_bgcolor='rgba(2, 6, 23, 0)',
+                        paper_bgcolor='rgba(2, 6, 23, 0)',
+                        font=dict(color='white'),
+                        height=450,
+                        margin=dict(l=60, r=30, t=60, b=60)
+                    )
+
+                    plot_json = fig_ind.to_json()
+
+                    # Datos para la tabla (primeros 10)
+                    indic_data_df = (
+                        np.vstack([
+                            np.array(t),
+                            criminals_per_police.values,
+                            arrest_fraction.values,
+                            security_index.values
+                        ]).T
+                    )
+
+                    # Crear diccionario con primeros 10 valores legibles
+                    indic_table = {}
+                    for k, row in enumerate(indic_data_df[:10]):
+                        # row[0] es el tiempo
+                        indic_table[str(row[0])] = {
+                            'Delincuentes_por_policia': float(row[1]),
+                            'Fraccion_arrestos': float(row[2]),
+                            'Indice_seguridad': float(row[3])
+                        }
+
+                    nivel['Indicadores de Seguridad'] = {
+                        'data': indic_table,
+                        'plot_json': plot_json,
+                        'title': 'Indicadores de Seguridad',
+                        'ylabel': 'Valor',
+                        'xlabel': 'Meses',
+                        'color': '#3b82f6'
+                    }
+
+            except Exception as e:
+                # No bloquear ejecución si falla cálculo de indicadores; solo ignorar
+                print(f"WARN: No se pudieron calcular indicadores: {e}")
+
             return nivel
         except Exception as e:
             error_message = [{

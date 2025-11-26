@@ -118,7 +118,10 @@
 
             <!-- Gráficos de Simulación -->
             <div class="row g-4 justify-content-center" id="graphs-container">
-                {% for nivel_data in nivel.values() %}
+                {% set ns = namespace(i=0) %}
+                {% for key, nivel_data in nivel.items() %}
+                    {% if key != 'Indicadores de Seguridad' %}
+                    {% set ns.i = ns.i + 1 %}
                     <div class="col-12 col-lg-6 d-flex">
                         <article class="graph-card flex-fill">
                             <header class="graph-card-header">
@@ -127,7 +130,7 @@
                                     <button
                                         class="btn btn-sm btn-outline-light table-icon"
                                         data-bs-toggle="modal"
-                                        data-bs-target="#tablaModal{{ loop.index }}"
+                                        data-bs-target="#tablaModal{{ ns.i }}"
                                     >
                                         <i class="bi bi-table"></i>
                                         <span class="d-none d-sm-inline">Ver datos</span>
@@ -135,7 +138,7 @@
                                 </div>
                             </header>
 
-                            <div class="graph-body" id="graph-{{ loop.index }}">
+                            <div class="graph-body" id="graph-{{ ns.i }}">
                                 <!-- Plotly renderizará aquí -->
                             </div>
                         </article>
@@ -143,15 +146,15 @@
                         <!-- MODAL TABLA -->
                         <div
                             class="modal fade"
-                            id="tablaModal{{ loop.index }}"
+                            id="tablaModal{{ ns.i }}"
                             tabindex="-1"
-                            aria-labelledby="tablaModalLabel{{ loop.index }}"
+                            aria-labelledby="tablaModalLabel{{ ns.i }}"
                             aria-hidden="true"
                         >
                             <div class="modal-dialog modal-dialog-centered modal-lg">
                                 <div class="modal-content modal-glass">
                                     <div class="modal-header">
-                                        <h5 class="modal-title" id="tablaModalLabel{{ loop.index }}">
+                                        <h5 class="modal-title" id="tablaModalLabel{{ ns.i }}">
                                             {{ nivel_data['title'] }}
                                         </h5>
                                         <button
@@ -197,6 +200,7 @@
                         </div>
                         <!-- /MODAL TABLA -->
                     </div>
+                    {% endif %}
                 {% endfor %}
             </div>
 
@@ -332,6 +336,76 @@
                     </article>
                 </div>
             </div>
+        </section>
+
+        <!-- SECCIÓN DE INDICADORES -->
+        <section class="container-fluid mt-5" id="indicators-section">
+            <div class="row g-3">
+                <div class="col-12">
+                    <h3 class="section-title">
+                        <i class="bi bi-list-check"></i>
+                        Indicadores
+                    </h3>
+                </div>
+
+                {% if 'Indicadores de Seguridad' in nivel %}
+                {% set ind = nivel['Indicadores de Seguridad'] %}
+                <div class="col-12">
+                    <article class="graph-card">
+                        <header class="graph-card-header">
+                            <h5 class="graph-title">{{ ind.title }}</h5>
+                            <div class="graph-controls">
+                                <button class="btn btn-sm btn-outline-light table-icon" data-bs-toggle="modal" data-bs-target="#tablaModalIndicadores">
+                                    <i class="bi bi-table"></i>
+                                    <span class="d-none d-sm-inline">Ver datos</span>
+                                </button>
+                            </div>
+                        </header>
+
+                        <div class="graph-body" id="indicators-graph"></div>
+                    </article>
+
+                    <!-- Modal Tabla Indicadores -->
+                    <div class="modal fade" id="tablaModalIndicadores" tabindex="-1">
+                        <div class="modal-dialog modal-dialog-centered modal-lg">
+                            <div class="modal-content modal-glass">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">{{ ind.title }}</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-dark table-striped table-hover align-middle mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th>Tiempo</th>
+                                                    <th>Delincuentes / Policía</th>
+                                                    <th>Fracción arrestos</th>
+                                                    <th>Índice de Seguridad</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for time, row in ind.data.items() %}
+                                                    <tr>
+                                                        <td>{{ time }}</td>
+                                                        <td>{{ row.Delincuentes_por_policia|float|round(2) }}</td>
+                                                        <td>{{ row.Fraccion_arrestos|float|round(4) }}</td>
+                                                        <td>{{ row.Indice_seguridad|float|round(2) }}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cerrar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
         </section>
     </main>
 
@@ -536,9 +610,35 @@
         
         // Renderizar gráficos al cargar la página
         document.addEventListener('DOMContentLoaded', function() {
-            {% for nivel_data in nivel.values() %}
+            {% set ns2 = namespace(i=0) %}
+            {% for key, nivel_data in nivel.items() %}
+                {% if key != 'Indicadores de Seguridad' %}
+                    {% set ns2.i = ns2.i + 1 %}
+                    (function() {
+                        const plotData = {{ nivel_data['plot_json']|safe }};
+                        const config = {
+                            responsive: true,
+                            displayModeBar: true,
+                            displaylogo: false,
+                            modeBarButtonsToAdd: ['pan2d', 'zoom2d', 'zoomIn2d', 'zoomOut2d', 'autoScale2d', 'resetScale2d'],
+                            modeBarButtonsToRemove: ['select2d', 'lasso2d'],
+                            toImageButtonOptions: {
+                                format: 'png',
+                                filename: '{{ nivel_data['title'] }}'.replace(/\s+/g, '_'),
+                                height: 600,
+                                width: 1000,
+                                scale: 2
+                            }
+                        };
+                        Plotly.newPlot('graph-{{ ns2.i }}', plotData.data, plotData.layout, config);
+                    })();
+                {% endif %}
+            {% endfor %}
+
+            // Renderizar el gráfico de indicadores si existe
+            {% if 'Indicadores de Seguridad' in nivel %}
                 (function() {
-                    const plotData = {{ nivel_data['plot_json']|safe }};
+                    const plotData = {{ nivel['Indicadores de Seguridad']['plot_json']|safe }};
                     const config = {
                         responsive: true,
                         displayModeBar: true,
@@ -547,16 +647,16 @@
                         modeBarButtonsToRemove: ['select2d', 'lasso2d'],
                         toImageButtonOptions: {
                             format: 'png',
-                            filename: '{{ nivel_data["title"] }}'.replace(/\s+/g, '_'),
+                            filename: '{{ nivel['Indicadores de Seguridad']['title'] }}'.replace(/\s+/g, '_'),
                             height: 600,
                             width: 1000,
                             scale: 2
                         }
                     };
-                    Plotly.newPlot('graph-{{ loop.index }}', plotData.data, plotData.layout, config);
+                    Plotly.newPlot('indicators-graph', plotData.data, plotData.layout, config);
                 })();
-            {% endfor %}
-            
+            {% endif %}
+
             // Inicializar KPIs con datos iniciales
             setTimeout(() => {
                 if (typeof updateKPIs === 'function') {
