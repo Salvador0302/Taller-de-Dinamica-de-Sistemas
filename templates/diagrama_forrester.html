@@ -70,23 +70,15 @@
                             {% endif %}
                         </header>
                         <div class="diagram-container" id="diagram-container">
-                            {% if diagram %}
-                                <img id="diagram-image" src="{{ diagram }}" alt="Diagrama de Forrester" style="max-width: 100%; height: auto; border-radius: 0.5rem; cursor: grab; transition: transform 0.3s ease;">
-                            {% elif error %}
+                            {# Mostrar imagen fija del diagrama de Forrester desde templates/ (archivo: diagrama forrester.png) #}
+                            {% if error %}
                                 <div class="placeholder-content">
                                     <i class="bi bi-exclamation-triangle-fill placeholder-icon" style="color: #ef4444;"></i>
                                     <h3>Error al generar diagrama</h3>
                                     <p>{{ error }}</p>
                                 </div>
                             {% else %}
-                                <div class="placeholder-content">
-                                    <i class="bi bi-share-fill placeholder-icon"></i>
-                                    <h3>Diagrama de Forrester</h3>
-                                    <p>Aquí se visualizará el diagrama de flujos y niveles del modelo.</p>
-                                    <div class="placeholder-info">
-                                        <span class="badge bg-primary">Próximamente</span>
-                                    </div>
-                                </div>
+                                <img id="diagram-image" src="{{ url_for('static', filename='images/diagrama forrester.png') }}" alt="Diagrama de Forrester" style="max-width: 100%; height: auto; border-radius: 0.5rem; cursor: grab; transition: transform 0.3s ease;">
                             {% endif %}
                         </div>
                     </article>

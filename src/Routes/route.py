@@ -82,6 +82,8 @@ def modelRoute(app):
             print(f"Error generando diagrama de Forrester: {str(e)}")
             respuesta = make_response(render_template('diagrama_forrester.html', diagram=None, error=str(e)))
             return respuesta
+
+    # NOTE: Diagram images are now served from static/images/ (no custom route needed)
     
     @app.route('/api/export/excel', methods=['POST'])
     def export_excel():
