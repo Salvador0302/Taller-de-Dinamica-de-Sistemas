@@ -255,9 +255,33 @@
                             </ul>
                         </div>
                     </div>
-                </div>                        <div class="controls-grid">
+                </div>
+                {% set param_map = {
+                    'tasa_inmigrantes': ['Poblacion inmigrante'],
+                    'tasa_emigrantes': ['Poblacion inmigrante'],
+                    'tasa_desempleo': ['Inmigrantes desempleados'],
+                    'tasa_nuevos_delincuentes': ['Delincuentes en la calle'],
+                    'tasa_muertes': ['Delincuentes en la calle'],
+                    'tasa_policias_contratados': ['Policias en servicio']
+                } %}
+
+                <div class="controls-grid">
                             <div class="control-item">
                                 <label for="tasa_inmigrantes">Tasa de inmigrantes</label>
+                                {% set affected = param_map['tasa_inmigrantes'] if 'tasa_inmigrantes' in param_map else [] %}
+                                {% if affected %}
+                                    <div class="param-legend">
+                                        {% for g in affected %}
+                                            {% if g in nivel %}
+                                                <span class="param-swatch" style="background: {{ nivel[g]['color'] }}"></span>
+                                                <span class="param-legend-label">{{ nivel[g]['title'] }}</span>
+                                            {% else %}
+                                                <span class="param-legend-label muted">{{ g }}</span>
+                                            {% endif %}
+                                            {% if not loop.last %}<span class="param-legend-sep">•</span>{% endif %}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
                                 <input
                                     type="range"
                                     class="form-range"
@@ -272,6 +296,20 @@
 
                             <div class="control-item">
                                 <label for="tasa_emigrantes">Tasa de emigrantes</label>
+                                {% set affected = param_map['tasa_emigrantes'] if 'tasa_emigrantes' in param_map else [] %}
+                                {% if affected %}
+                                    <div class="param-legend">
+                                        {% for g in affected %}
+                                            {% if g in nivel %}
+                                                <span class="param-swatch" style="background: {{ nivel[g]['color'] }}"></span>
+                                                <span class="param-legend-label">{{ nivel[g]['title'] }}</span>
+                                            {% else %}
+                                                <span class="param-legend-label muted">{{ g }}</span>
+                                            {% endif %}
+                                            {% if not loop.last %}<span class="param-legend-sep">•</span>{% endif %}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
                                 <input
                                     type="range"
                                     class="form-range"
@@ -286,6 +324,20 @@
 
                             <div class="control-item">
                                 <label for="tasa_desempleo">Tasa de desempleo</label>
+                                {% set affected = param_map['tasa_desempleo'] if 'tasa_desempleo' in param_map else [] %}
+                                {% if affected %}
+                                    <div class="param-legend">
+                                        {% for g in affected %}
+                                            {% if g in nivel %}
+                                                <span class="param-swatch" style="background: {{ nivel[g]['color'] }}"></span>
+                                                <span class="param-legend-label">{{ nivel[g]['title'] }}</span>
+                                            {% else %}
+                                                <span class="param-legend-label muted">{{ g }}</span>
+                                            {% endif %}
+                                            {% if not loop.last %}<span class="param-legend-sep">•</span>{% endif %}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
                                 <input
                                     type="range"
                                     class="form-range"
@@ -300,6 +352,20 @@
 
                             <div class="control-item">
                                 <label for="tasa_nuevos_delincuentes">Tasa de nuevos delincuentes</label>
+                                {% set affected = param_map['tasa_nuevos_delincuentes'] if 'tasa_nuevos_delincuentes' in param_map else [] %}
+                                {% if affected %}
+                                    <div class="param-legend">
+                                        {% for g in affected %}
+                                            {% if g in nivel %}
+                                                <span class="param-swatch" style="background: {{ nivel[g]['color'] }}"></span>
+                                                <span class="param-legend-label">{{ nivel[g]['title'] }}</span>
+                                            {% else %}
+                                                <span class="param-legend-label muted">{{ g }}</span>
+                                            {% endif %}
+                                            {% if not loop.last %}<span class="param-legend-sep">•</span>{% endif %}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
                                 <input
                                     type="range"
                                     class="form-range"
@@ -314,6 +380,20 @@
 
                             <div class="control-item">
                                 <label for="tasa_muertes">Tasa de muertes</label>
+                                {% set affected = param_map['tasa_muertes'] if 'tasa_muertes' in param_map else [] %}
+                                {% if affected %}
+                                    <div class="param-legend">
+                                        {% for g in affected %}
+                                            {% if g in nivel %}
+                                                <span class="param-swatch" style="background: {{ nivel[g]['color'] }}"></span>
+                                                <span class="param-legend-label">{{ nivel[g]['title'] }}</span>
+                                            {% else %}
+                                                <span class="param-legend-label muted">{{ g }}</span>
+                                            {% endif %}
+                                            {% if not loop.last %}<span class="param-legend-sep">•</span>{% endif %}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
                                 <input
                                     type="range"
                                     class="form-range"
@@ -328,6 +408,20 @@
 
                             <div class="control-item">
                                 <label for="tasa_policias_contratados">Tasa de policías contratados</label>
+                                {% set affected = param_map['tasa_policias_contratados'] if 'tasa_policias_contratados' in param_map else [] %}
+                                {% if affected %}
+                                    <div class="param-legend">
+                                        {% for g in affected %}
+                                            {% if g in nivel %}
+                                                <span class="param-swatch" style="background: {{ nivel[g]['color'] }}"></span>
+                                                <span class="param-legend-label">{{ nivel[g]['title'] }}</span>
+                                            {% else %}
+                                                <span class="param-legend-label muted">{{ g }}</span>
+                                            {% endif %}
+                                            {% if not loop.last %}<span class="param-legend-sep">•</span>{% endif %}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
                                 <input
                                     type="range"
                                     class="form-range"
