@@ -3,10 +3,7 @@ import ssl
 import mysql.connector
 from flask import Flask
 from dotenv import load_dotenv
-<<<<<<< HEAD
 from decouple import config
-=======
->>>>>>> origin/main
 
 # Cargar variables de entorno desde .env
 load_dotenv()
@@ -19,7 +16,6 @@ from src.Routes.route import modelRoute
 
 ssl._create_default_https_context = ssl._create_unverified_context
 
-<<<<<<< HEAD
 def setup_database_if_needed():
     """Crea la base de datos y las tablas automáticamente si no existen"""
     try:
@@ -106,9 +102,6 @@ def setup_database_if_needed():
 
 # Configurar base de datos automáticamente al iniciar
 setup_database_if_needed()
-
-=======
->>>>>>> origin/main
 app = Flask(__name__)
 modelRoute(app)
 
