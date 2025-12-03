@@ -172,6 +172,7 @@ SELECT * FROM model;
 
 ### 6️⃣ Configurar Variables de Entorno
 
+<<<<<<< HEAD
 **Copiar el archivo de ejemplo y configurarlo:**
 
 ```bash
@@ -183,12 +184,16 @@ cp .env.example .env
 ```
 
 Luego edita el archivo `.env` con tus credenciales:
+=======
+Crear archivo `.env` en la raíz del proyecto:
+>>>>>>> origin/main
 
 ```env
 # Configuración de Base de Datos
 DB_HOST=localhost
 DB_PORT=3306
 DB_USERNAME=root
+<<<<<<< HEAD
 DB_PASSWORD=tu_contraseña_aqui
 DB_DATABASE=vensimweb
 APP_URL_VENSIM=http://localhost/assets/vensim/document.mdl
@@ -196,13 +201,23 @@ APP_URL_VENSIM=http://localhost/assets/vensim/document.mdl
 # Configuración del Asistente AI (Opcional)
 AI_PROVIDER=gemini
 GEMINI_API_KEY=tu_api_key_aqui
+=======
+DB_PASSWORD=
+DB_DATABASE=vensimweb
+
+# Configuración Opcional (no modificar)
+APP_URL_VENSIM=http://localhost/assets/vensim/document.mdl
+>>>>>>> origin/main
 ```
 
 **⚠️ Notas importantes:**
 - `DB_PASSWORD` déjalo vacío si no configuraste contraseña en MySQL
 - Si cambiaste el puerto de MySQL, ajusta `DB_PORT`
 - Si creaste un usuario específico, ajusta `DB_USERNAME`
+<<<<<<< HEAD
 - **NUNCA subas el archivo `.env` al repositorio** (ya está en `.gitignore`)
+=======
+>>>>>>> origin/main
 
 ### 7️⃣ Verificar Modelo Vensim
 
