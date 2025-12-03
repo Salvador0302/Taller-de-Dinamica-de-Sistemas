@@ -172,24 +172,37 @@ SELECT * FROM model;
 
 ### 6️⃣ Configurar Variables de Entorno
 
-Crear archivo `.env` en la raíz del proyecto:
+**Copiar el archivo de ejemplo y configurarlo:**
+
+```bash
+# Windows PowerShell
+Copy-Item .env.example .env
+
+# Linux/Mac
+cp .env.example .env
+```
+
+Luego edita el archivo `.env` con tus credenciales:
 
 ```env
 # Configuración de Base de Datos
 DB_HOST=localhost
 DB_PORT=3306
 DB_USERNAME=root
-DB_PASSWORD=
+DB_PASSWORD=tu_contraseña_aqui
 DB_DATABASE=vensimweb
-
-# Configuración Opcional (no modificar)
 APP_URL_VENSIM=http://localhost/assets/vensim/document.mdl
+
+# Configuración del Asistente AI (Opcional)
+AI_PROVIDER=gemini
+GEMINI_API_KEY=tu_api_key_aqui
 ```
 
 **⚠️ Notas importantes:**
 - `DB_PASSWORD` déjalo vacío si no configuraste contraseña en MySQL
 - Si cambiaste el puerto de MySQL, ajusta `DB_PORT`
 - Si creaste un usuario específico, ajusta `DB_USERNAME`
+- **NUNCA subas el archivo `.env` al repositorio** (ya está en `.gitignore`)
 
 ### 7️⃣ Verificar Modelo Vensim
 
