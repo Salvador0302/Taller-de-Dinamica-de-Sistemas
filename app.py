@@ -24,7 +24,7 @@ def setup_database_if_needed():
             host=config('DB_HOST', default='localhost'),
             port=int(config('DB_PORT', default=3306)),
             user=config('DB_USERNAME', default='root'),
-            password=config('DB_PASSWORD', default='')
+            password=config('DB_PASSWORD', default='12345')
         )
         
         cursor = connection.cursor()
